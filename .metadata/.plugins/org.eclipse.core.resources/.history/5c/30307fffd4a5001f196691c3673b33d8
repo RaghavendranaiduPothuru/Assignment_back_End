@@ -1,0 +1,61 @@
+package main.java.curd;
+
+import java.sql.*;
+import java.util.Scanner;
+
+public class RegistrationService {
+    private final Connection connection;
+
+    public RegistrationService() throws SQLException {
+        this.connection = DatabaseConnection.getConnection();
+    }
+
+    // Create
+    public void addUser(String name, String email, String dob, String phone) throws SQLException {
+        String query = "INSERT INTO Registration (Name, Email, DateOfBirth, PhoneNumber) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, name);
+            stmt.setString(2, email);
+            stmt.setDate(3, Date.valueOf(dob));
+            stmt.setString(4, phone);
+            stmt.executeUpdate();
+            System.out.println("User added successfully.");
+        }
+    }
+
+    // Read
+    public void listUsers() throws SQLException {
+        String query = "SELECT * FROM Registration";
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                System.out.printf("ID: %d, Name: %s, Email: %s, DOB: %s, Phone: %s, CreatedAt: %s%n",
+                        rs.getInt("ID"), rs.getString("Name"), rs.getString("Email"),
+                        rs.getDate("DateOfBirth"), rs.getString("PhoneNumber"), rs.getTimestamp("CreatedAt"));
+            }
+        }
+    }
+
+    // Update
+    public void updateUser(int id, String name, String email, String dob, String phone) throws SQLException {
+        String query = "UPDATE Registration SET Name = ?, Email = ?, DateOfBirth = ?, PhoneNumber = ? WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, name);
+            stmt.setString(2, email);
+            stmt.setDate(3, Date.valueOf(dob));
+            stmt.setString(4, phone);
+            stmt.setInt(5, id);
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println(rowsAffected > 0 ? "User updated successfully." : "User not found.");
+        }
+    }
+
+    // Delete
+    public void deleteUser(int id) throws SQLException {
+        String query = "DELETE FROM Registration WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println(rowsAffected > 0 ? "User deleted successfully." : "User not found.");
+        }
+    }
+}
